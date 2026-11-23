@@ -51,7 +51,7 @@ pipeline {
                     sh '''
                         docker login -u vipin0102 -p Attentive@123
                         docker pull $IMAGE_NAME:$IMAGE_TAG
-                        docker run --name -itd -p 5555:80 $IMAGE_NAME:$IMAGE_TAG
+                        docker run --name web -itd -p 5555:80 $IMAGE_NAME:$IMAGE_TAG
                     '''
                 }
             }
