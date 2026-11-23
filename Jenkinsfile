@@ -1,31 +1,55 @@
-
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "vipin0102/jenkins-test"
-        IMAGE_TAG = "v_0.0.1"
+    parameters {
+        choice(
+            name: 'IMAGE_NAME',
+            choices: ['vipin0102/jenkins-test', 'vipin0102/another-app'],
+            description: 'Choose the Docker image repository'
+        )
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: 'v_0.0.1',
+            description: 'Please provide the image tag'
+        )
+        string(
+            name: 'CONTAINER_NAME',
+            defaultValue: 'web',
+            description: 'Name of the container to run'
+        )
+        string(
+            name: 'HOST_PORT',
+            defaultValue: '5555',
+            description: 'Host port to expose the app on'
+        )
+        booleanParam(
+            name: 'RUN_BUILD',
+            defaultValue: true,
+            description: 'Build and push the image?'
+        )
+        booleanParam(
+            name: 'RUN_DEPLOY',
+            defaultValue: true,
+            description: 'Pull and deploy the image?'
+        )
     }
 
     stages {
 
-        stage('Build') {
-//            when {
-//                branch 'main'
-//            }
-
+        stage('Build & Push') {
+            when { expression { params.RUN_BUILD } }
             steps {
-                echo 'Docker Login & Docker push'
+                echo "Building ${params.IMAGE_NAME}:${params.IMAGE_TAG}"
 
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'github-token',
-                        passwordVariable: 'dockerpassword',
-                        usernameVariable: 'dockerbuild'
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
                     sh '''
-                        docker login -u vipin0102 -p Attentive@123
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker build --no-cache -t $IMAGE_NAME:$IMAGE_TAG .
                         docker push $IMAGE_NAME:$IMAGE_TAG
                     '''
@@ -33,27 +57,33 @@ pipeline {
             }
         }
 
-        stage('Pull & Deploy Image') {
-//            when {
-//                branch 'main'
-//            }
-
+        stage('Pull & Deploy') {
+            when { expression { params.RUN_DEPLOY } }
             steps {
-                echo 'Docker Login & Docker push'
+                echo "Deploying ${params.IMAGE_NAME}:${params.IMAGE_TAG} on port ${params.HOST_PORT}"
 
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'github-token',
-                        passwordVariable: 'dockerpassword',
-                        usernameVariable: 'dockerbuild'
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
                     sh '''
-                        docker login -u vipin0102 -p Attentive@123
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker pull $IMAGE_NAME:$IMAGE_TAG
-                        docker run --name web -itd -p 5555:80 $IMAGE_NAME:$IMAGE_TAG
+                        docker rm -f $CONTAINER_NAME || true
+                        docker run --name $CONTAINER_NAME -d -p $HOST_PORT:80 $IMAGE_NAME:$IMAGE_TAG
                     '''
                 }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                currentBuild.displayName = "#${env.BUILD_NUMBER} ${params.IMAGE_NAME}:${params.IMAGE_TAG}"
             }
         }
     }
