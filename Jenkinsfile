@@ -30,11 +30,8 @@ pipeline {
             }
             steps {
                 echo 'Docker Login & Docker push'
-                withCredentials([usernamePassword(credentialsId: 'github-token', passwordVariable: 'dockerpassword', usernameVariable: 'dockerbuild')]),
-                    string(
-                        credentialsId: 'INFRD_SERVER_IP',
-                        variable: 'INFRD_SERVER_IP'
-                    ) {
+                withCredentials([usernamePassword(credentialsId: 'github-token', passwordVariable: 'dockerpassword', usernameVariable: 'dockerbuild')])
+                 {
                 sh '''
                     docker login -u $dockerbuild -p $dockerpassword
                     docker pull $IMAGE_NAME:$IMAGE_TAG
