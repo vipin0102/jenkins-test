@@ -10,9 +10,9 @@ pipeline {
     stages {
 
         stage('Build') {
-            when {
-                branch 'main'
-            }
+//            when {
+//                branch 'main'
+//            }
 
             steps {
                 echo 'Docker Login & Docker push'
@@ -34,9 +34,9 @@ pipeline {
         }
 
         stage('Pull & Deploy Image') {
-            when {
-                branch 'main'
-            }
+//            when {
+//                branch 'main'
+//            }
 
             steps {
                 echo 'Docker Login & Docker push'
