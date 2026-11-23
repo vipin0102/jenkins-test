@@ -4,7 +4,7 @@ pipeline {
     parameters {
         choice(
             name: 'IMAGE_NAME',
-            choices: ['vipin0102/jenkins-test', 'vipin0102/another-app'],
+            choices: ['vipin0102/jenkins-test-main', 'vipin0102/jenkins-test-dev'],
             description: 'Choose the Docker image repository'
         )
         string(
@@ -23,12 +23,12 @@ pipeline {
             description: 'Host port to expose the app on'
         )
         booleanParam(
-            name: 'RUN_BUILD',
+            name: 'BUILD',
             defaultValue: true,
             description: 'Build and push the image?'
         )
         booleanParam(
-            name: 'RUN_DEPLOY',
+            name: 'DEPLOY',
             defaultValue: true,
             description: 'Pull and deploy the image?'
         )
@@ -37,7 +37,7 @@ pipeline {
     stages {
 
         stage('Build & Push') {
-            when { expression { params.RUN_BUILD } }
+            when { expression { params.BUILD } }
             steps {
                 echo "Building ${params.IMAGE_NAME}:${params.IMAGE_TAG}"
 
@@ -58,7 +58,7 @@ pipeline {
         }
 
         stage('Pull & Deploy') {
-            when { expression { params.RUN_DEPLOY } }
+            when { expression { params.DEPLOY } }
             steps {
                 echo "Deploying ${params.IMAGE_NAME}:${params.IMAGE_TAG} on port ${params.HOST_PORT}"
 
