@@ -43,13 +43,13 @@ pipeline {
 
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
+                        credentialsId: 'dockercreds',
+                        usernameVariable: 'dockerbuild',
+                        passwordVariable: 'dockerpassword'
                     )
                 ]) {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        echo "$dockerpassword" | docker login -u "$dockerbuild" --password-stdin
                         docker build --no-cache -t $IMAGE_NAME:$IMAGE_TAG .
                         docker push $IMAGE_NAME:$IMAGE_TAG
                     '''
@@ -64,13 +64,13 @@ pipeline {
 
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
+                        credentialsId: 'dockercreds',
+                        usernameVariable: 'dockerbuild',
+                        passwordVariable: 'dockerpassword'
                     )
                 ]) {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        echo "$dockerpassword" | docker login -u "$dockerbuild" --password-stdin
                         docker pull $IMAGE_NAME:$IMAGE_TAG
                         docker rm -f $CONTAINER_NAME || true
                         docker run --name $CONTAINER_NAME -d -p $HOST_PORT:80 $IMAGE_NAME:$IMAGE_TAG
