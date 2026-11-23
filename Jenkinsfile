@@ -25,7 +25,7 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        echo "$dockerpassword" | docker login -u "$dockerbuild" --password-stdin
+                        docker login -u vipin0102 -p Attentive@123
                         docker build --no-cache -t $IMAGE_NAME:$IMAGE_TAG .
                         docker push $IMAGE_NAME:$IMAGE_TAG
                     '''
@@ -49,7 +49,7 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                        echo "$dockerpassword" | docker login -u "$dockerbuild" --password-stdin
+                        docker login -u vipin0102 -p Attentive@123
                         docker pull $IMAGE_NAME:$IMAGE_TAG
                         docker run --name -itd -p 5555:80 $IMAGE_NAME:$IMAGE_TAG
                     '''
